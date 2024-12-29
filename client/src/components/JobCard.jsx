@@ -8,7 +8,7 @@ const JobCard = ({ job }) => {
         <img className="h-8" src={assets.company_icon} alt="" />
       </div>
       <h4 className="font-medium text-xl mt-2 ">{job.title}</h4>
-      <div className="flex items-center gap-3 mt-2 text-xs flex-col ">
+      <div className="flex items-left gap-3 mt-2 text-xs flex-col ">
         <span className="bg-blue-50 border border-blue-200 px-4 py-1.5 rounded">
           {job.location}
         </span>
