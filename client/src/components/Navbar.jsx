@@ -9,7 +9,7 @@ const Navbar = () => {
 
   const navigate = useNavigate();
 
-  const { setshowRecruiterLogin } = useContext(AppContext);
+  const { setShowRecruiterLogin } = useContext(AppContext);
 
   return (
     <div className="shadow py-4">
@@ -32,7 +32,7 @@ const Navbar = () => {
         ) : (
           <div className="flex gap-4 max-sm:text-xs">
             <button
-              onClick={(e) => setshowRecruiterLogin(true)}
+              onClick={(e) => setShowRecruiterLogin(true)}
               className="text-grey-600">
               Recruter login
             </button>
