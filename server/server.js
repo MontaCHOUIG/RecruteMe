@@ -39,7 +39,9 @@ app.get("/", (req, res) => {
 app.get("/debug-sentry", function mainHandler(req, res) {
   throw new Error("My first Sentry error!");
 });
-app.post("/webhooks", clerkWebhook.clerkWebhook);
+app.post("/webhooks", (req, res) => {
+  console.log(req.body);
+});
 const PORT = process.env.PORT || 3000;
 
 // The error handler must be registered before any other error middleware and after all controllers

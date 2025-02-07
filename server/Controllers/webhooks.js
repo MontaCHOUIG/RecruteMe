@@ -1,53 +1,65 @@
-const Webhook = require("svix");
+const { Svix } = require("svix");
 const User = require("../Models/User");
 
-// API controller to manage clerk User with database
+// API controller to manage Clerk User with database
 exports.clerkWebhook = async (req, res) => {
   try {
-    // Create a Svix instance with clerk secret key
-    const whook = new Webhook(process.env.CLERK_SECRET_KEY);
-    //Verify headers
-    await whook.verify(JSON.stringify(req.body), {
-      "svix-id": req.headers["svix-id"],
-      "svix-signature": req.headers["svix-signature"],
-      "svix-timestamp": req.headers["svix-timestamp"],
-    });
+    // Clerk's webhook secret from environment variables
+    const svixSecret = process.env.CLERK_SECRET_KEY;
+
+    if (!svixSecret) {
+      throw new Error("Missing Clerk Webhook Secret");
+    }
+
+    // Create an instance of Svix
+    const svix = new Svix(svixSecret);
+
+    // Verify the incoming webhook
+    const event = svix.webhooks.verify(req.headers, req.body);
+
+    console.log("Webhook Event:", event);
 
     // Extract data from the webhook
-    const { data, type } = req.body;
-    // Switch case for different types of webhooks
+    const { data, type } = event;
 
     switch (type) {
       case "user.created":
-        // Create a new user in the database
         const user = await User.create({
           _id: data.id,
-          name: data.first_name + " " + data.last_name,
+          name: `${data.first_name} ${data.last_name}`,
           email: data.email_addresses[0].email_address,
           image: data.image_url,
           resume: "",
         });
-        res.json({ message: "User created successfully", user });
+        res.status(201).json({ message: "User created successfully", user });
         break;
+
       case "user.updated":
-        // Update the user in the database
-        const updatedUser = await User.findByIdAndUpdate(data.id, {
-          name: data.first_name + " " + data.last_name,
-          email: data.email_addresses[0].email_address,
-          image: data.image_url,
-        });
-        res.json({ message: "User updated successfully", user });
+        const updatedUser = await User.findByIdAndUpdate(
+          data.id,
+          {
+            name: `${data.first_name} ${data.last_name}`,
+            email: data.email_addresses[0].email_address,
+            image: data.image_url,
+          },
+          { new: true }
+        );
+        res
+          .status(200)
+          .json({ message: "User updated successfully", updatedUser });
         break;
+
       case "user.deleted":
-        // Delete the user from the database
-        const deletedUser = await User.findByIdAndDelete(data.id);
-        res.json({ message: "User deleted successfully", user });
+        await User.findByIdAndDelete(data.id);
+        res.status(200).json({ message: "User deleted successfully" });
         break;
+
       default:
-        console.log("Invalid webhook type");
+        console.log("Unhandled webhook type:", type);
+        res.status(400).json({ message: "Invalid webhook type" });
     }
   } catch (err) {
-    console.log(err);
+    console.error("Webhook Error:", err);
     res.status(400).json({ message: "Invalid webhook" });
   }
 };
