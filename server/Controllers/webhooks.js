@@ -1,25 +1,27 @@
-const { Svix } = require("svix");
+const { Webhook } = require("svix"); // Use Webhook, not Svix
 const User = require("../Models/User");
 
-// API controller to manage Clerk User with database
+// Clerk Webhook Handler
 exports.clerkWebhook = async (req, res) => {
   try {
-    // Clerk's webhook secret from environment variables
     const svixSecret = process.env.CLERK_SECRET_KEY;
+    if (!svixSecret) throw new Error("Missing Clerk Webhook Secret");
 
-    if (!svixSecret) {
-      throw new Error("Missing Clerk Webhook Secret");
-    }
+    // Initialize Webhook verifier
+    const webhook = new Webhook(svixSecret);
 
-    // Create an instance of Svix
-    const svix = new Svix(svixSecret);
+    // Verify Webhook Signature
+    const payloadString = JSON.stringify(req.body);
+    const headers = {
+      "svix-id": req.headers["svix-id"],
+      "svix-signature": req.headers["svix-signature"],
+      "svix-timestamp": req.headers["svix-timestamp"],
+    };
 
-    // Verify the incoming webhook
-    const event = svix.webhooks.verify(req.headers, req.body);
+    const event = webhook.verify(payloadString, headers);
 
     console.log("Webhook Event:", event);
 
-    // Extract data from the webhook
     const { data, type } = event;
 
     switch (type) {
