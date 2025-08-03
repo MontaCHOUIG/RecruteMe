@@ -1,4 +1,4 @@
-const { Webhook } = require("svix"); // Use Webhook, not Svix
+const { Webhook } = require("svix"); // Use Webhook
 const User = require("../Models/User");
 
 // Clerk Webhook Handler

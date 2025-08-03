@@ -10,6 +10,8 @@ require("./config/instrument.js");
 const clerkWebhook = require("./Controllers/webhooks.js");
 const app = express();
 
+const companyRoutes = require("./routes/companyRoutes");
+
 // Middleware
 
 app.use(express.json());
@@ -40,6 +42,9 @@ app.get("/debug-sentry", function mainHandler(req, res) {
   throw new Error("My first Sentry error!");
 });
 app.post("/webhooks", clerkWebhook.clerkWebhook);
+
+app.use("/api/v1/companies", companyRoutes);
+
 const PORT = process.env.PORT || 3000;
 
 // The error handler must be registered before any other error middleware and after all controllers
