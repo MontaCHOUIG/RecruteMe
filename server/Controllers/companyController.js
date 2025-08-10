@@ -14,6 +14,19 @@ exports.register = async (req, res) => {
     console.error("Error registering company:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
+  const newCompany = new Company({
+    name,
+    email,
+    password,
+    image,
+  });
+  try {
+    await newCompany.save();
+    return res.status(201).json({ message: "Company registered successfully" });
+  } catch (error) {
+    console.error("Error saving company:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };
 
 // company login
