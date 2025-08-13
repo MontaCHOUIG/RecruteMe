@@ -30,11 +30,43 @@ exports.register = async (req, res) => {
 };
 
 // company login
-exports.loginCompany = async (req, res) => {};
+exports.loginCompany = async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+  try {
+    const company = await Company.findOne({ email });
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+    const isMatch = await company.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    const token = company.generateAuthToken();
+    return res.status(200).json({ token });
+  } catch (error) {
+    console.error("Error logging in company:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 // get company
 
-exports.getCompanyData = async (req, res) => {};
+exports.getCompanyData = async (req, res) => {
+  const companyId = req.params.id;
+  try {
+    const company = await Company.findById(companyId);
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+    return res.status(200).json(company);
+  } catch (error) {
+    console.error("Error fetching company data:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 //
 
