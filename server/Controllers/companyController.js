@@ -72,7 +72,20 @@ exports.getCompanyData = async (req, res) => {
 
 // get company job applicants
 
-exports.getCompanyJobApplicants = async (req, res) => {};
+exports.getCompanyJobApplicants = async (req, res) => {
+  const companyId = req.params.id;
+  try {
+    const company = await Company.findById(companyId);
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+    const jobApplicants = await JobApplication.find({ companyId });
+    return res.status(200).json(jobApplicants);
+  } catch (error) {
+    console.error("Error fetching job applicants:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 // get company posted jobs
 
